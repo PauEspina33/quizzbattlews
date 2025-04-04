@@ -63,7 +63,7 @@ public class FriendshipController {
 		return friendshipService.findAllByReceiverAndStatus(player, status);
 	}
 
-	@Operation(summary = "Update a friendship", description = "Updates an existing friendship")
+	@Operation(summary = "Update to accept a friendship", description = "Updates an existing friendship to accept it")
 	@ApiResponse(responseCode = "200", content = {
 			@Content(mediaType = "application/json", schema = @Schema(implementation = Friendship.class)) }, description = "Friendship updated successfully")
 	@ApiResponse(responseCode = "404", content = {

@@ -46,4 +46,20 @@ public class FriendshipServiceImpl implements FriendshipService {
 		return friendshipRepository.save(existingFriendship);
 	}
 
+	@Override
+	public Friendship createFriendship(Player sender, Player receiver) {
+		if (sender == null) {
+			throw new IllegalArgumentException("Sender must be provided to create a friendship.");
+		}
+		if (receiver == null) {
+			throw new IllegalArgumentException("Receiver must be provided to create a friendship.");
+		}
+
+		Friendship friendship = new Friendship();
+		friendship.setSender(sender);
+		friendship.setReceiver(receiver);
+		friendship.setStatus(Friendship.Status.PENDING);
+		return friendshipRepository.saveAndFlush(friendship);
+	}
+
 }

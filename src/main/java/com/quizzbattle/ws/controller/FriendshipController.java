@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -63,7 +64,7 @@ public class FriendshipController {
 		return friendshipService.findAllByReceiverAndStatus(player, status);
 	}
 
-	@Operation(summary = "Update to accept a friendship", description = "Updates an existing friendship to accept it")
+	@Operation(summary = "Update a friendship", description = "Updates an existing friendship")
 	@ApiResponse(responseCode = "200", content = {
 			@Content(mediaType = "application/json", schema = @Schema(implementation = Friendship.class)) }, description = "Friendship updated successfully")
 	@ApiResponse(responseCode = "404", content = {
@@ -82,6 +83,21 @@ public class FriendshipController {
 	@DeleteMapping("/delete/by/id/{id}")
 	public void deleteById(@PathVariable("id") Long Id) {
 		friendshipService.deleteById(Id);
+	}
+
+	@Operation(summary = "Create a new friendship", description = "Creates a new friendship between two players")
+	@ApiResponse(responseCode = "201", content = {
+			@Content(mediaType = "application/json", schema = @Schema(implementation = Friendship.class)) }, description = "Friendship created successfully")
+	@ApiResponse(responseCode = "400", content = {
+			@Content(mediaType = "application/json") }, description = "Invalid request data")
+	@PostMapping("/create")
+	public Friendship createFriendship(@RequestParam(value = "sender") String senderUsername,
+			@RequestParam(value = "receiver") String receiverUsername) {
+
+		Player sender = (Player) userService.getByUsername(senderUsername);
+		Player receiver = receiverUsername != null ? (Player) userService.getByUsername(receiverUsername) : null;
+
+		return friendshipService.createFriendship(sender, receiver);
 	}
 
 }

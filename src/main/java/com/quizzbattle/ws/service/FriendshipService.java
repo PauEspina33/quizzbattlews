@@ -15,4 +15,6 @@ public interface FriendshipService {
 	void deleteById(Long id);
 
 	Friendship update(Long id);
+
+	Friendship createFriendship(Player sender, Player receiver);
 }

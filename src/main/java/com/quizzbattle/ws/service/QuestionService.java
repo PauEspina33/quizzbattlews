@@ -9,4 +9,6 @@ public interface QuestionService {
 
 	List<Question> findAll(Category category);
 
+	List<Question> findRandom(Category category);
+
 }

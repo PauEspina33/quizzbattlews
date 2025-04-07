@@ -44,4 +44,15 @@ public class QuestionController {
 		Category category = categoryName != null ? categoryService.getByName(categoryName) : null;
 		return questionService.findAll(category);
 	}
+
+	@Operation(summary = "Find random questions by category", description = "Retrieve random question filtered by category")
+	@ApiResponse(responseCode = "200", content = {
+			@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Question.class))) }, description = "Question retrieved successfully")
+	@GetMapping("/find/random/by/category")
+	public List<Question> findRandom(
+			@Parameter(description = "Name of the category", required = false) @RequestParam(value = "categoryName", required = true) String categoryName) {
+
+		Category category = categoryName != null ? categoryService.getByName(categoryName) : null;
+		return questionService.findRandom(category);
+	}
 }

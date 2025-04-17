@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.quizzbattle.ws.model.Game;
+import com.quizzbattle.ws.model.Game.Status;
 import com.quizzbattle.ws.model.Player;
 
 public interface GameRepository extends JpaRepository<Game, Long> {
@@ -13,6 +14,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 	@Query("""
 			    SELECT g FROM Game g
 			    WHERE (g.player1 = :player OR g.player2 = :player)
+			    AND (g.status = :status)
 			    ORDER BY
 			        CASE
 			            WHEN g.turn = :player THEN 0
@@ -20,7 +22,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 			            ELSE 2
 			        END
 			""")
-	List<Game> findAllByPlayerOrderedByTurn(Player player);
+	List<Game> findAllByPlayerOrderedByTurn(Player player, Status status);
 
 	List<Game> findByPlayer1Id(Long playerId);
 

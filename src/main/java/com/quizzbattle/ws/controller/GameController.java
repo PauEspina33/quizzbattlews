@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.quizzbattle.ws.model.Game;
+import com.quizzbattle.ws.model.Game.Status;
 import com.quizzbattle.ws.model.Player;
 import com.quizzbattle.ws.service.GameService;
 import com.quizzbattle.ws.service.UserService;
@@ -46,9 +47,10 @@ public class GameController {
 			@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Game.class))) }, description = "Games retrieved successfully")
 	@GetMapping("/find/all")
 	public List<Game> findAll(
-			@Parameter(description = "Username of the player", required = true) @RequestParam(value = "username") String username) {
+			@Parameter(description = "Username of the player", required = true) @RequestParam(value = "username") String username,
+			@RequestParam(value = "status", required = true) Status status) {
 		Player player = (Player) userService.getByUsername(username);
-		return gameService.findAll(player);
+		return gameService.findAll(player, status);
 	}
 
 	@Operation(summary = "Update a game")

@@ -1,5 +1,6 @@
 package com.quizzbattle.ws.service.impl;
 
+import java.io.ObjectInputFilter.Status;
 import java.util.List;
 import java.util.Random;
 
@@ -34,16 +35,17 @@ public class GameServiceImpl implements GameService {
 
 	@Autowired
 	private JwtUtils jwtUtils;
-
+	
 	@Override
-	public List<Game> findAll(Player player) {
+	public List<Game> findAll(Player player, com.quizzbattle.ws.model.Game.Status status) {
 		if (!(jwtUtils.isAdmin() || jwtUtils.isAuthUser(player.getUsername()))) {
 			throw new ForbiddenException(
 					messageSource.getMessage("error.Forbidden.users.get", null, LocaleContextHolder.getLocale()));
 		}
-		return gameRepository.findAllByPlayerOrderedByTurn(player);
+		return gameRepository.findAllByPlayerOrderedByTurn(player, status);
 	}
 
+	
 	@Override
 	public Game update(@NotNull @Valid Game game) {
 		Game dbGame = gameRepository.findById(game.getId()).orElseThrow(() -> new NotFoundException("Game not found"));
@@ -104,5 +106,7 @@ public class GameServiceImpl implements GameService {
 
 		return gameRepository.saveAndFlush(game);
 	}
+
+
 
 }

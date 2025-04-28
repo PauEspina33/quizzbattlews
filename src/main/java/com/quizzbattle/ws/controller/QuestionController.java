@@ -3,10 +3,12 @@ package com.quizzbattle.ws.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.quizzbattle.ws.model.Category;
 import com.quizzbattle.ws.model.Question;
@@ -45,14 +47,21 @@ public class QuestionController {
 		return questionService.findAll(category);
 	}
 
-	@Operation(summary = "Find random questions by category", description = "Retrieve random question filtered by category")
+	@Operation(summary = "Find random question by category", description = "Retrieve a random question filtered by category")
 	@ApiResponse(responseCode = "200", content = {
-			@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Question.class))) }, description = "Question retrieved successfully")
+	        @Content(mediaType = "application/json", schema = @Schema(implementation = Question.class)) }, description = "Question retrieved successfully")
 	@GetMapping("/find/random/by/category")
-	public List<Question> findRandom(
-			@Parameter(description = "Name of the category", required = false) @RequestParam(value = "categoryName", required = true) String categoryName) {
+	public Question findRandom(
+	        @Parameter(description = "Name of the category", required = true) @RequestParam(value = "categoryName", required = true) String categoryName) {
 
-		Category category = categoryName != null ? categoryService.getByName(categoryName) : null;
-		return questionService.findRandom(category);
+	    Category category = categoryName != null ? categoryService.getByName(categoryName) : null;
+	    List<Question> questions = questionService.findRandom(category);
+
+	    if (questions == null || questions.isEmpty()) {
+	        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No questions found for the category");
+	    }
+
+	    return questions.get(0); // Devuelve solo UNA pregunta
 	}
+
 }

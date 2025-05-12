@@ -86,10 +86,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Validated(OnUserUpdate.class)
 	public User update(@NotNull @Valid User user) {
-		if (!(jwtUtils.isAdmin() || jwtUtils.isAuthUser(user.getUsername()))) {
-			throw new ForbiddenException(
-					messageSource.getMessage("error.Forbidden.users.update", null, LocaleContextHolder.getLocale()));
-		}
 
 		User dbUser = userRepository.findById(user.getId()).orElseThrow(() -> new NotFoundException("User not found"));
 

@@ -2,9 +2,12 @@ package com.quizzbattle.ws.model;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -33,12 +36,23 @@ public class Player extends User implements Serializable {
 	private String fcmToken;
 
 	/* Foto de perfil (URL) */
-	@Column(name = "profile_picture", columnDefinition = "TEXT")
-	private String profilePicture;
+	@Lob
+	@Column(name = "profile_picture", columnDefinition = "LONGBLOB")
+	@JsonIgnore
+	private byte[] profilePicture;
 
 	@Override
 	public String getInfo() {
 		return "Player: " + username + " (" + email + ")";
 	}
+	
+	// Getters y Setters
+    public byte[] getImage() {
+        return profilePicture;
+    }
+
+    public void setImage(byte[] picture) {
+        this.profilePicture = picture;
+    }
 
 }

@@ -1,8 +1,11 @@
 package com.quizzbattle.ws.controller;
 
+import java.util.Base64;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +20,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.quizzbattle.ws.model.Admin;
+import com.quizzbattle.ws.model.ImageRequest;
+import com.quizzbattle.ws.model.ImageResponse;
 import com.quizzbattle.ws.model.Player;
 import com.quizzbattle.ws.model.User;
 import com.quizzbattle.ws.model.User.Role;
@@ -29,6 +34,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -75,6 +81,46 @@ public class UserController {
 
 		return userService.findAll(roles, fullName);
 	}
+	
+	@Operation(summary = "Save a user", description = "Saves a user in the database. The response is the stored user from the database.")
+	@ApiResponse(responseCode = "200", content = {
+			@Content(mediaType = "application/json", schema = @Schema(implementation = ImageRequest.class)) }, description = "User saved ok")
+	@ApiResponse(responseCode = "500", content = {
+			@Content() }, description = "Error saving the user. See response body for more details")
+	@PostMapping(value = "/upload/image-profile")
+	@Validated(OnUserCreate.class)
+	public ResponseEntity<String> uploadProfilePicture(@RequestBody @Valid ImageRequest imageRequest) throws Exception {
+		 if (imageRequest.getImageBase64()== null || imageRequest.getImageBase64().isEmpty()) {
+		        return ResponseEntity.badRequest().body("Base64 vacío o nulo");
+		   }
+		System.out.println("Imagen Base64 recibida: " + imageRequest.getImageBase64()); // Log para depuración
+
+	    Player player = (Player) userService.getByUsername(imageRequest.getUsername());
+	    player.setImage(imageRequest.decodeImageBase64(imageRequest.getImageBase64()));
+	    userService.update(player);
+	    return ResponseEntity.ok("Imagen de perfil actualizada correctamente");
+	}
+	
+	@GetMapping("/profile-picture/{username}")
+	@Operation(
+	    summary = "Obtener imagen de perfil en Base64",
+	    description = "Devuelve la imagen de perfil del usuario codificada en Base64"
+	)
+	@ApiResponses({
+	    @ApiResponse(responseCode = "200", description = "Imagen obtenida correctamente",
+	        content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+	    @ApiResponse(responseCode = "404", description = "Usuario o imagen no encontrada")
+	})
+	public ResponseEntity<ImageResponse> getProfilePictureBase64(@PathVariable String username) {
+	    Player player = (Player) userService.getByUsername(username);
+	    if (player == null || player.getImage() == null) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	    }
+
+	    String base64Image = "data:image/png;base64," + Base64.getEncoder().encodeToString(player.getImage());
+	    return ResponseEntity.ok(new ImageResponse(base64Image));
+	}
+
 
 	@Operation(summary = "Save a user", description = "Saves a user in the database. The response is the stored user from the database.")
 	@ApiResponse(responseCode = "200", content = {

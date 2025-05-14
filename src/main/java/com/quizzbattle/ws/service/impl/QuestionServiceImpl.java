@@ -7,8 +7,10 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.quizzbattle.ws.exception.NotFoundException;
 import com.quizzbattle.ws.model.Category;
 import com.quizzbattle.ws.model.Question;
+import com.quizzbattle.ws.model.User;
 import com.quizzbattle.ws.repository.QuestionRepository;
 import com.quizzbattle.ws.service.QuestionService;
 
@@ -35,6 +37,27 @@ public class QuestionServiceImpl implements QuestionService {
 		Question randomQuestion = questions.get(random.nextInt(questions.size()));
 
 		return List.of(randomQuestion); // Devuelves la pregunta envuelta en una lista
+	}
+
+	@Override
+	public Question getById(Long id) {
+		
+		if (!questionRepository.existsById(id)) {
+			return null;
+		}
+		
+		return questionRepository.getById(id);
+	}
+
+	@Override
+	public Question update(Question question) {
+		Question dbQuestion = questionRepository.findById(question.getId()).orElseThrow(() -> new NotFoundException("Question not found"));		
+		
+		if (question.getImage()!=null) {
+			dbQuestion.setImage(question.getImage());
+		}
+		
+		return questionRepository.saveAndFlush(question);
 	}
 
 }

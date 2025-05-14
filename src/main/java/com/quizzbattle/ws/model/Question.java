@@ -1,5 +1,7 @@
 package com.quizzbattle.ws.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -61,6 +63,20 @@ public class Question {
     private String wrongOption3;
 
     /* Optional image URL for question */
-    @Column(name = "image_url")
-    private String imageUrl;
+    /* Foto de perfil (URL) */
+	@Lob
+	@Column(name = "image", columnDefinition = "LONGBLOB")
+	@JsonIgnore
+	private byte[] image;
+	
+	// Getters y Setters
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] picture) {
+        this.image = picture;
+    }
+	
+	
 }

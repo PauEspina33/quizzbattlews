@@ -41,6 +41,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.websocket.server.PathParam;
 
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
+
+import com.quizzbattle.ws.model.TokenRequest;
+
 @Tag(name = "User", description = "User API")
 
 @RestController
@@ -155,6 +162,28 @@ public class UserController {
 	public void deleteByUsername(@PathVariable("username") @NotBlank String username) {
 		userService.deleteByUsername(username);
 	}
+	
+	@PostMapping("/send-notification")
+	public ResponseEntity<String> sendNotificationToToken(@Valid @RequestBody TokenRequest tokenRequest) {
+	    try {
+	        Message message = Message.builder()
+	            .setToken(tokenRequest.getToken())
+	            .setNotification(Notification.builder()
+	                .setTitle(tokenRequest.getTitle())
+	                .setBody(tokenRequest.getBody())
+	                // .setImage("https://example.com/imagen.png") // Opcional
+	                .build())
+	            .build();
+
+	        String response = FirebaseMessaging.getInstance().send(message);
+	        return ResponseEntity.ok("Mensaje enviado con éxito. ID: " + response);
+	    } catch (FirebaseMessagingException e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	            .body("Error enviando mensaje: " + e.getMessage());
+	    }
+	}
+
 
 	private User convertAndEncodePassword(User user) {
 		String rawPassword = user.getPassword();
